@@ -19,3 +19,6 @@
 ## 2024-05-24 - Streamlit Custom CSS and Disabled States
 **Learning:** When applying custom CSS to Streamlit components (e.g., `.stButton>button`, `textarea`), explicitly including `:disabled` pseudo-class overrides is necessary. Failing to do so overrides Streamlit's native disabled visual affordances, causing disabled elements to improperly inherit active styles.
 **Action:** Always explicitly include `:disabled` pseudo-class overrides when applying custom CSS to interactive components in Streamlit to preserve accessibility and proper visual cues.
+## 2024-05-25 - Visibility of System Status
+**Learning:** When configuration controls (like search modes) are inside a collapsible sidebar, users lose context of the active state when it is collapsed.
+**Action:** Always surface the active configuration state in the main view.

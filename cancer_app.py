@@ -588,6 +588,18 @@ with tab_upload:
 with tab_chat:
 
     col1, col2 = st.columns([0.85, 0.15])
+    with col1:
+        # Surface current settings explicitly above chat input
+        c_mode = QUERY_MODE_LABELS[query_mode]
+        c_filter = f"{cancer_filter.capitalize()} cancer" if cancer_filter else "All cancers"
+        st.markdown(
+            f"<div role='status' aria-live='polite' style='color: #6c757d; font-size: 13px; font-weight: 500;'>"
+            f"<span>🔍 Mode: {c_mode}</span>"
+            f"<span style='margin-left: 15px;'>🎯 Filter: {c_filter}</span>"
+            f"</div>",
+            unsafe_allow_html=True
+        )
+
     with col2:
         chat_is_empty = len(st.session_state.messages) <= 1
         clear_help = "Chat is already empty" if chat_is_empty else "Reset the conversation history"
