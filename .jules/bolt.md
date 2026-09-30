@@ -43,3 +43,6 @@
 ## 2024-05-24 - Image Pixel Iteration Overhead
 **Learning:** Python-level loops over pixel data (e.g., using Pillow's `list(img.getdata())` and iterating pixel by pixel) introduces massive interpreter bytecode overhead. In this codebase, rewriting these operations using vectorized NumPy routines (e.g. `np.asarray`, `np.count_nonzero`) reduced image processing time significantly (~8.5x speedup in isolated tests), and fixed Pillow 14 deprecation warnings.
 **Action:** Always convert image pixel data to NumPy arrays using `np.asarray` with signed integers (`dtype=np.int16`) for pixel math and use vectorized NumPy methods rather than `getdata()` or manual iteration.
+## 2025-05-18 - Optimized Top-K Selection with Heapq
+**Learning:** In top-K retrieval algorithms like Reciprocal Rank Fusion, sorting the entire combined scoring dictionary using `sorted(...)[:top_n]` is an O(N log N) operation, which causes unnecessary performance overhead when `N` is large and we only need the top `K` items.
+**Action:** Always use `heapq.nlargest(top_n, iterable, key)` for top-K selection instead of full sorts to improve algorithmic complexity from O(N log N) to O(N log K).
