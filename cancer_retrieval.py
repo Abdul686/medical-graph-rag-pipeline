@@ -667,9 +667,15 @@ _PARTIAL_NO_ANSWER_RE = re.compile("|".join(f"(?:{p})" for p in _PARTIAL_NO_ANSW
 
 def _rag_has_no_answer(answer: str) -> bool:
     answer_lower  = answer.lower()
-    phrase_hits = sum(1 for p in NO_ANSWER_PHRASES if p in answer_lower)
-    if len(answer.strip()) < 300 and phrase_hits >= 1: return True
-    if phrase_hits >= 2: return True
+    is_short = len(answer.strip()) < 300
+    phrase_hits = 0
+    # ⚡ Bolt: Replaced sum() generator with a standard for loop and early return
+    # to avoid unnecessary iterations once the required threshold is met.
+    for p in NO_ANSWER_PHRASES:
+        if p in answer_lower:
+            phrase_hits += 1
+            if is_short and phrase_hits >= 1: return True
+            if phrase_hits >= 2: return True
     return bool(_PARTIAL_NO_ANSWER_RE.search(answer_lower))
 
 # =============================================================================

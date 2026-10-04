@@ -55,3 +55,9 @@
 ## 2024-05-18 - Optimize MMR similarity calculation
 **Learning:** Calculating similarities against all selected vectors on every iteration (O(K² * N)) is redundant. Max similarities monotonically increase, so we can track `max_sims` incrementally by only comparing the newly selected vector against all candidates (O(K * N)).
 **Action:** When implementing MMR or similar greedy selection algorithms, use incremental max-tracking instead of recalculating full similarity matrices on each iteration to significantly improve execution time.
+## 2026-10-04 - Avoiding redundant calculations in generators
+**Learning:** Iterating through generator expressions passed to  calculates every item even if the condition is met early.
+**Action:** Replace  generator expressions with a standard  loop and an early  to stop iterating immediately once the required condition is satisfied, significantly improving performance.
+## $(date +%Y-%m-%d) - Avoiding redundant calculations in generators
+**Learning:** Iterating through generator expressions passed to `sum()` calculates every item even if the condition is met early.
+**Action:** Replace `sum()` generator expressions with a standard `for` loop and an early `return` to stop iterating immediately once the required condition is satisfied, significantly improving performance.
