@@ -476,9 +476,13 @@ class GraphRetriever:
         self.driver.close()
 
 _graph_retriever: Optional[GraphRetriever] = None
+_graph_retriever_lock = threading.Lock()
 def get_graph_retriever() -> GraphRetriever:
     global _graph_retriever
-    if _graph_retriever is None: _graph_retriever = GraphRetriever()
+    if _graph_retriever is None:
+        with _graph_retriever_lock:
+            if _graph_retriever is None:
+                _graph_retriever = GraphRetriever()
     return _graph_retriever
 
 def _format_graph_context(rows: list[dict], intent: str) -> str:
@@ -593,10 +597,22 @@ def _combine_sources_properly(src1: list, src2: list) -> list:
 def _is_out_of_corpus_query(query: str) -> bool:
     return bool(_OUT_OF_CORPUS_RE.search(query))
 
+_ddgs_client: Optional[Any] = None
+_ddgs_client_lock = threading.Lock()
+
+def get_ddgs_client() -> Any:
+    global _ddgs_client
+    if _ddgs_client is None:
+        with _ddgs_client_lock:
+            if _ddgs_client is None:
+                _ddgs_client = DDGS()
+    return _ddgs_client
+
+
 def _duckduckgo_search(query: str, max_results: int = 5) -> list[dict]:
     """
     FIX 3: Fault-tolerant DDG search.
-    Implements a context manager -> direct object fallback architecture.
+    Implements connection pooling to reuse underlying HTTP connection.
     """
     if not _DDG_AVAILABLE: return []
 
@@ -607,16 +623,19 @@ def _duckduckgo_search(query: str, max_results: int = 5) -> list[dict]:
     fallback_query = query # If the suffix breaks the search
 
     try:
-        with DDGS() as ddgs:
-            results = list(ddgs.text(primary_query, max_results=max_results))
-            if not results: # Broaden search
-                results = list(ddgs.text(fallback_query, max_results=max_results))
-            return [{"title": r.get("title", ""), "url": r.get("href", ""), "snippet": r.get("body", "")} for r in results]
+        ddgs = get_ddgs_client()
+        results = list(ddgs.text(primary_query, max_results=max_results))
+        if not results: # Broaden search
+            results = list(ddgs.text(fallback_query, max_results=max_results))
+        return [{"title": r.get("title", ""), "url": r.get("href", ""), "snippet": r.get("body", "")} for r in results]
     except Exception as e:
-        print(f"   ⚠️ DDGS context manager failed ({e}). Retrying direct object...")
+        print(f"   ⚠️ DDGS pooled connection failed ({e}). Retrying direct object...")
         try:
-            ddgs = DDGS()
-            results = list(ddgs.text(primary_query, max_results=max_results))
+            # Recreate connection pool in case it was poisoned or disconnected
+            global _ddgs_client
+            with _ddgs_client_lock:
+                _ddgs_client = DDGS()
+            results = list(_ddgs_client.text(primary_query, max_results=max_results))
             return [{"title": r.get("title", ""), "url": r.get("href", ""), "snippet": r.get("body", "")} for r in results]
         except Exception as inner_e:
             print(f"   ❌ Complete DDG Failure: {inner_e}")
