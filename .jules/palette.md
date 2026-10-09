@@ -45,3 +45,6 @@
 ## 2026-09-18 - Added confirmation dialog for clear chat
 **Learning:** Destructive actions (like clearing a chat with long contextual history in a medical context) require a confirmation dialog to prevent accidental data loss.
 **Action:** Implemented a `@st.dialog` to explicitly confirm the destructive action of clearing the chat before executing it.
+## 2025-03-03 - Do Not Rely Solely on Color for Error States
+**Learning:** Using only color (like turning text red) to indicate constraint violations (such as exceeding character limits) violates WCAG 1.4.1 (Use of Color). This leaves users with visual impairments or color blindness without a clear indicator of the error state.
+**Action:** Always pair color changes with a clear visual icon (e.g., `⚠️`) or textual explanation to ensure error states are accessible to all users.
