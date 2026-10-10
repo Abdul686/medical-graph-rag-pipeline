@@ -61,3 +61,6 @@
 ## $(date +%Y-%m-%d) - Avoiding redundant calculations in generators
 **Learning:** Iterating through generator expressions passed to `sum()` calculates every item even if the condition is met early.
 **Action:** Replace `sum()` generator expressions with a standard `for` loop and an early `return` to stop iterating immediately once the required condition is satisfied, significantly improving performance.
+## 2024-11-20 - Connection Pooling for all Clients
+**Learning:** Instantiating new instances of API/Database clients like `DDGS()` or `GraphRetriever` inside frequently called methods (like `_duckduckgo_search` or `get_graph_retriever()`) destroys the connection pool (TCP/TLS) causing massive latency. Using singletons without locking is thread-unsafe and can cause connection leaks.
+**Action:** Use a thread-safe singleton pattern with double-checked locking using `threading.Lock()` for all stateful network clients (HTTP, Neo4j, etc) to ensure the connection pool is reused across requests without thread-safety issues.
