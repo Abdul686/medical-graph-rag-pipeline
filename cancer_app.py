@@ -591,9 +591,10 @@ with tab_upload:
 
     char_count = len(pasted_report) if pasted_report else 0
     limit_color = "#dc3545" if char_count > 10000 else "#6c757d"
+    limit_icon = "⚠️ " if char_count > 10000 else ""
     st.markdown(
         f"<div role='status' aria-live='polite' style='text-align: right; color: {limit_color}; font-size: 13px; margin-top: -10px; margin-bottom: 10px;'>"
-        f"{char_count:,} / 10,000 characters"
+        f"{limit_icon}{char_count:,} / 10,000 characters"
         f"</div>",
         unsafe_allow_html=True
     )
@@ -621,7 +622,7 @@ with tab_upload:
 
         st.info("💡 **Report analyzed!** Switch to the **Chat** tab to see your personalized clinical and nutritional analysis.")
 
-        with st.expander("Preview loaded report"):
+        with st.expander(f"Preview loaded report ({len(patient_context):,} characters)"):
             preview = patient_context[:800]
             if len(patient_context) > 800:
                 preview += f"\n\n... ({len(patient_context) - 800} more characters)"
